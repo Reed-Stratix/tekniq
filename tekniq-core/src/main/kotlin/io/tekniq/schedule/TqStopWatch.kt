@@ -1,14 +1,21 @@
 package io.tekniq.schedule
 
-class TqStopWatch(private val tag: String? = null) {
-    private var start = System.currentTimeMillis()
+class TqStopWatch(private val context: Any? = null) {
+    private val markers = mutableMapOf("" to System.currentTimeMillis())
 
     fun reset() {
-        start = System.currentTimeMillis()
+        markers.clear()
+        markers[""] = System.currentTimeMillis()
     }
 
-    fun elapse(action: (durationInMs: Long, tag: String?) -> Unit) {
-        action(System.currentTimeMillis() - start, tag)
+    fun mark(marker: String) {
+        if (marker.isEmpty()) throw IllegalStateException("Marker cannot be an empty string")
+        markers[marker] = System.currentTimeMillis()
+    }
+
+    fun elapse(marker: String = "", action: (markerDurationInMs: Long, context: Any?) -> Unit) {
+        val start = markers[marker] ?: throw IllegalStateException("Undefined marker '$marker'")
+        action(System.currentTimeMillis() - start, context)
     }
 }
 
